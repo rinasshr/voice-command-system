@@ -27,7 +27,9 @@ export default function LoginPage() {
       localStorage.setItem('username', data.username);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Ошибка');
+      const detail = err.response?.data?.detail;
+      const msg = typeof detail === 'string' ? detail : JSON.stringify(detail);
+      setError(msg || err.message || 'Ошибка соединения с сервером');
     }
   };
 
