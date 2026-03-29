@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 
-export default function LoginPage() {
+export default function LoginPage({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
@@ -70,6 +70,7 @@ export default function LoginPage() {
       localStorage.setItem('role', data.role);
       localStorage.setItem('username', data.username);
 
+      if (onLogin) onLogin();
       setTimeout(() => navigate('/'), isRegister ? 800 : 0);
     } catch (err) {
       const detail = err.response?.data?.detail;
@@ -106,52 +107,110 @@ export default function LoginPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #e3f2fd 0%, #f5f5f5 100%)',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      padding: 20,
     }}>
       <div style={{
-        width: 400,
-        padding: 36,
+        width: '100%',
+        maxWidth: 420,
+        padding: 40,
         background: '#fff',
-        borderRadius: 16,
-        boxShadow: '0 4px 24px rgba(0,0,0,0.1)',
+        borderRadius: 24,
+        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
       }}>
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <div style={{
-            width: 56, height: 56, borderRadius: '50%',
-            background: '#1976d2', margin: '0 auto 16px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 28, color: '#fff',
+            width: 80,
+            height: 80,
+            borderRadius: 20,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            margin: '0 auto 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 36,
+            boxShadow: '0 10px 30px rgba(102, 126, 234, 0.4)',
           }}>
-            {isRegister ? '+' : '\u2192'}
+            🎤
           </div>
-          <h2 style={{ margin: 0, fontSize: 22, color: '#1a1a1a' }}>
-            {isRegister ? 'Создание аккаунта' : 'Вход в систему'}
-          </h2>
+          <h1 style={{ margin: 0, fontSize: 26, color: '#1a1a1a', fontWeight: 700 }}>
+            Voice Commands
+          </h1>
           <p style={{ margin: '8px 0 0', fontSize: 14, color: '#888' }}>
-            {isRegister
-              ? 'Заполните данные для регистрации'
-              : 'Введите логин и пароль для входа'}
+            Система распознавания голосовых команд
           </p>
+        </div>
+
+        <div style={{
+          display: 'flex',
+          background: '#f5f5f5',
+          borderRadius: 12,
+          padding: 4,
+          marginBottom: 28,
+        }}>
+          <button
+            type="button"
+            onClick={() => !isRegister || switchMode()}
+            style={{
+              flex: 1,
+              padding: '12px 20px',
+              border: 'none',
+              borderRadius: 10,
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              background: !isRegister ? 'white' : 'transparent',
+              color: !isRegister ? '#667eea' : '#888',
+              boxShadow: !isRegister ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
+            }}
+          >
+            Вход
+          </button>
+          <button
+            type="button"
+            onClick={() => isRegister || switchMode()}
+            style={{
+              flex: 1,
+              padding: '12px 20px',
+              border: 'none',
+              borderRadius: 10,
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              background: isRegister ? 'white' : 'transparent',
+              color: isRegister ? '#667eea' : '#888',
+              boxShadow: isRegister ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
+            }}
+          >
+            Регистрация
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} noValidate>
           {/* Username */}
-          <div style={{ marginBottom: 18 }}>
+          <div style={{ marginBottom: 20 }}>
             <label style={{
-              display: 'block', marginBottom: 6, fontSize: 13,
-              fontWeight: 600, color: '#444',
+              display: 'block', marginBottom: 8, fontSize: 13,
+              fontWeight: 600, color: '#333',
             }}>
               Логин
             </label>
             <input
               style={{
-                width: '100%', padding: '11px 14px',
-                border: `1.5px solid ${fieldErrors.username ? '#d32f2f' : '#ddd'}`,
-                borderRadius: 8, fontSize: 15, boxSizing: 'border-box',
-                outline: 'none', transition: 'border-color 0.2s',
+                width: '100%',
+                padding: '14px 16px',
+                border: `2px solid ${fieldErrors.username ? '#e53935' : '#e0e0e0'}`,
+                borderRadius: 12,
+                fontSize: 15,
+                boxSizing: 'border-box',
+                outline: 'none',
+                transition: 'border-color 0.2s, box-shadow 0.2s',
+                background: '#fafafa',
               }}
               placeholder="Введите логин"
               value={username}
@@ -159,36 +218,38 @@ export default function LoginPage() {
                 setUsername(e.target.value);
                 if (fieldErrors.username) setFieldErrors({ ...fieldErrors, username: '' });
               }}
+              onFocus={(e) => e.target.style.borderColor = '#667eea'}
+              onBlur={(e) => e.target.style.borderColor = fieldErrors.username ? '#e53935' : '#e0e0e0'}
               autoComplete="username"
               autoFocus
             />
             {fieldErrors.username && (
-              <p style={{ color: '#d32f2f', fontSize: 12, marginTop: 4 }}>
-                {fieldErrors.username}
-              </p>
-            )}
-            {isRegister && !fieldErrors.username && (
-              <p style={{ color: '#888', fontSize: 12, marginTop: 4 }}>
-                Буквы и цифры, от 3 до 30 символов
+              <p style={{ color: '#e53935', fontSize: 12, marginTop: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
+                ⚠️ {fieldErrors.username}
               </p>
             )}
           </div>
 
           {/* Password */}
-          <div style={{ marginBottom: 18 }}>
+          <div style={{ marginBottom: 20 }}>
             <label style={{
-              display: 'block', marginBottom: 6, fontSize: 13,
-              fontWeight: 600, color: '#444',
+              display: 'block', marginBottom: 8, fontSize: 13,
+              fontWeight: 600, color: '#333',
             }}>
               Пароль
             </label>
             <div style={{ position: 'relative' }}>
               <input
                 style={{
-                  width: '100%', padding: '11px 44px 11px 14px',
-                  border: `1.5px solid ${fieldErrors.password ? '#d32f2f' : '#ddd'}`,
-                  borderRadius: 8, fontSize: 15, boxSizing: 'border-box',
-                  outline: 'none', transition: 'border-color 0.2s',
+                  width: '100%',
+                  padding: '14px 50px 14px 16px',
+                  border: `2px solid ${fieldErrors.password ? '#e53935' : '#e0e0e0'}`,
+                  borderRadius: 12,
+                  fontSize: 15,
+                  boxSizing: 'border-box',
+                  outline: 'none',
+                  transition: 'border-color 0.2s',
+                  background: '#fafafa',
                 }}
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Введите пароль"
@@ -197,49 +258,57 @@ export default function LoginPage() {
                   setPassword(e.target.value);
                   if (fieldErrors.password) setFieldErrors({ ...fieldErrors, password: '' });
                 }}
+                onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                onBlur={(e) => e.target.style.borderColor = fieldErrors.password ? '#e53935' : '#e0e0e0'}
                 autoComplete={isRegister ? 'new-password' : 'current-password'}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 style={{
-                  position: 'absolute', right: 10, top: '50%',
+                  position: 'absolute',
+                  right: 14,
+                  top: '50%',
                   transform: 'translateY(-50%)',
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  fontSize: 13, color: '#888', padding: 4,
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: 18,
+                  padding: 4,
+                  opacity: 0.6,
                 }}
                 tabIndex={-1}
               >
-                {showPassword ? 'Скрыть' : 'Показать'}
+                {showPassword ? '🙈' : '👁️'}
               </button>
             </div>
             {fieldErrors.password && (
-              <p style={{ color: '#d32f2f', fontSize: 12, marginTop: 4 }}>
-                {fieldErrors.password}
-              </p>
-            )}
-            {isRegister && !fieldErrors.password && (
-              <p style={{ color: '#888', fontSize: 12, marginTop: 4 }}>
-                Минимум 4 символа
+              <p style={{ color: '#e53935', fontSize: 12, marginTop: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
+                ⚠️ {fieldErrors.password}
               </p>
             )}
           </div>
 
           {/* Password confirm (register only) */}
           {isRegister && (
-            <div style={{ marginBottom: 18 }}>
+            <div style={{ marginBottom: 20 }}>
               <label style={{
-                display: 'block', marginBottom: 6, fontSize: 13,
-                fontWeight: 600, color: '#444',
+                display: 'block', marginBottom: 8, fontSize: 13,
+                fontWeight: 600, color: '#333',
               }}>
                 Подтверждение пароля
               </label>
               <input
                 style={{
-                  width: '100%', padding: '11px 14px',
-                  border: `1.5px solid ${fieldErrors.passwordConfirm ? '#d32f2f' : '#ddd'}`,
-                  borderRadius: 8, fontSize: 15, boxSizing: 'border-box',
-                  outline: 'none', transition: 'border-color 0.2s',
+                  width: '100%',
+                  padding: '14px 16px',
+                  border: `2px solid ${fieldErrors.passwordConfirm ? '#e53935' : '#e0e0e0'}`,
+                  borderRadius: 12,
+                  fontSize: 15,
+                  boxSizing: 'border-box',
+                  outline: 'none',
+                  transition: 'border-color 0.2s',
+                  background: '#fafafa',
                 }}
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Повторите пароль"
@@ -249,11 +318,13 @@ export default function LoginPage() {
                   if (fieldErrors.passwordConfirm)
                     setFieldErrors({ ...fieldErrors, passwordConfirm: '' });
                 }}
+                onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                onBlur={(e) => e.target.style.borderColor = fieldErrors.passwordConfirm ? '#e53935' : '#e0e0e0'}
                 autoComplete="new-password"
               />
               {fieldErrors.passwordConfirm && (
-                <p style={{ color: '#d32f2f', fontSize: 12, marginTop: 4 }}>
-                  {fieldErrors.passwordConfirm}
+                <p style={{ color: '#e53935', fontSize: 12, marginTop: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  ⚠️ {fieldErrors.passwordConfirm}
                 </p>
               )}
             </div>
@@ -262,10 +333,18 @@ export default function LoginPage() {
           {/* Error message */}
           {error && (
             <div style={{
-              background: '#ffebee', color: '#c62828', padding: '10px 14px',
-              borderRadius: 8, fontSize: 14, marginBottom: 16,
-              border: '1px solid #ef9a9a',
+              background: '#ffebee',
+              color: '#c62828',
+              padding: '14px 16px',
+              borderRadius: 12,
+              fontSize: 14,
+              marginBottom: 20,
+              border: '1px solid #ffcdd2',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
             }}>
+              <span style={{ fontSize: 18 }}>❌</span>
               {error}
             </div>
           )}
@@ -273,10 +352,18 @@ export default function LoginPage() {
           {/* Success message */}
           {success && (
             <div style={{
-              background: '#e8f5e9', color: '#2e7d32', padding: '10px 14px',
-              borderRadius: 8, fontSize: 14, marginBottom: 16,
-              border: '1px solid #a5d6a7',
+              background: '#e8f5e9',
+              color: '#2e7d32',
+              padding: '14px 16px',
+              borderRadius: 12,
+              fontSize: 14,
+              marginBottom: 20,
+              border: '1px solid #c8e6c9',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
             }}>
+              <span style={{ fontSize: 18 }}>✅</span>
               {success}
             </div>
           )}
@@ -286,39 +373,38 @@ export default function LoginPage() {
             type="submit"
             disabled={loading}
             style={{
-              width: '100%', padding: 13,
-              background: loading ? '#90caf9' : '#1976d2',
-              color: '#fff', border: 'none', borderRadius: 8,
-              fontSize: 16, cursor: loading ? 'not-allowed' : 'pointer',
-              fontWeight: 600, transition: 'background 0.2s',
+              width: '100%',
+              padding: 16,
+              background: loading
+                ? '#bdbdbd'
+                : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 12,
+              fontSize: 16,
+              cursor: loading ? 'not-allowed' : 'pointer',
+              fontWeight: 600,
+              transition: 'all 0.2s',
+              boxShadow: loading ? 'none' : '0 4px 15px rgba(102, 126, 234, 0.4)',
             }}
           >
             {loading
-              ? (isRegister ? 'Регистрация...' : 'Вход...')
-              : (isRegister ? 'Зарегистрироваться' : 'Войти')}
+              ? (isRegister ? '⏳ Регистрация...' : '⏳ Вход...')
+              : (isRegister ? 'Создать аккаунт' : 'Войти в систему')}
           </button>
         </form>
 
-        {/* Switch mode */}
-        <div style={{
-          textAlign: 'center', marginTop: 20, paddingTop: 16,
-          borderTop: '1px solid #eee',
+        {/* Footer hint */}
+        <p style={{
+          textAlign: 'center',
+          marginTop: 24,
+          fontSize: 13,
+          color: '#999',
         }}>
-          <span style={{ fontSize: 14, color: '#666' }}>
-            {isRegister ? 'Уже есть аккаунт?' : 'Нет аккаунта?'}
-          </span>
-          {' '}
-          <button
-            onClick={switchMode}
-            style={{
-              background: 'none', border: 'none', color: '#1976d2',
-              cursor: 'pointer', fontSize: 14, fontWeight: 600,
-              textDecoration: 'underline',
-            }}
-          >
-            {isRegister ? 'Войти' : 'Зарегистрироваться'}
-          </button>
-        </div>
+          {isRegister
+            ? 'После регистрации вы сможете записывать голосовые команды'
+            : 'Введите данные для входа в систему'}
+        </p>
       </div>
     </div>
   );
