@@ -100,11 +100,30 @@ def create_default_admin():
 
 @app.post("/api/auth/register", response_model=UserOut)
 def register(data: UserCreate, db: Session = Depends(get_db)):
-    if db.query(User).filter(User.username == data.username).first():
-        raise HTTPException(400, "Username already exists")
+    username = data.username.strip()
+    password = data.password
+
+    if not username:
+        raise HTTPException(400, "Введите логин")
+    if len(username) < 3:
+        raise HTTPException(400, "Логин должен содержать минимум 3 символа")
+    if len(username) > 30:
+        raise HTTPException(400, "Логин не может быть длиннее 30 символов")
+    if not username.isalnum():
+        raise HTTPException(400, "Логин может содержать только буквы и цифры")
+    if not password:
+        raise HTTPException(400, "Введите пароль")
+    if len(password) < 4:
+        raise HTTPException(400, "Пароль должен содержать минимум 4 символа")
+    if len(password) > 72:
+        raise HTTPException(400, "Пароль не может быть длиннее 72 символов")
+
+    if db.query(User).filter(User.username == username).first():
+        raise HTTPException(409, "Пользователь с таким логином уже существует")
+
     user = User(
-        username=data.username,
-        hashed_password=hash_password(data.password),
+        username=username,
+        hashed_password=hash_password(password),
         role="operator",
     )
     db.add(user)
@@ -117,9 +136,9 @@ def register(data: UserCreate, db: Session = Depends(get_db)):
 def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == form.username).first()
     if not user or not verify_password(form.password, user.hashed_password):
-        raise HTTPException(401, "Invalid credentials")
+        raise HTTPException(401, "Неверный логин или пароль")
     if not user.is_active:
-        raise HTTPException(403, "Account is blocked")
+        raise HTTPException(403, "Учётная запись заблокирована. Обратитесь к администратору")
     token = create_access_token({"sub": str(user.id)})
     return {"access_token": token, "token_type": "bearer", "role": user.role, "username": user.username}
 
