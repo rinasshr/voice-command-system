@@ -1,11 +1,13 @@
 {
   "name": "Voice Command System",
-  "dockerComposeFile": "../docker-compose.yml",
-  "service": "backend",
-  "workspaceFolder": "/app",
-  "forwardPorts": [8000, 3000],
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "20" }
+  },
+  "forwardPorts": [8000, 5173],
+  "postCreateCommand": "bash .devcontainer/setup.sh",
   "portsAttributes": {
-    "8000": { "label": "Backend API", "onAutoForward": "notify" },
-    "3000": { "label": "Frontend", "onAutoForward": "openBrowser" }
+    "5173": { "label": "Frontend", "onAutoForward": "openBrowser" },
+    "8000": { "label": "Backend API", "onAutoForward": "notify" }
   }
 }
