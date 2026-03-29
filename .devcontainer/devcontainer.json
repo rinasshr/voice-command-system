@@ -1,0 +1,11 @@
+{
+  "name": "Voice Command System",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "backend",
+  "workspaceFolder": "/app",
+  "forwardPorts": [8000, 3000],
+  "portsAttributes": {
+    "8000": { "label": "Backend API", "onAutoForward": "notify" },
+    "3000": { "label": "Frontend", "onAutoForward": "openBrowser" }
+  }
+}
